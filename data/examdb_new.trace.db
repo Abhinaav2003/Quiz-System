@@ -1,0 +1,18 @@
+2026-10-19 04:55:13.838051+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2026-10-19 04:57:16.896407+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2026-10-19 04:57:39.219059+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2026-10-19 04:58:03.930387+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2026-10-19 04:58:19.021840+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2026-10-19 04:58:19.032841+05:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2026-10-19 04:58:39.395058+05:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM EXAM_ANSWERS EXAM_RESULTS [*]USERS QUESTION USERS USERS USERS EXAM_RESULT_ID QUESTION_ID ID ID ID"; SQL statement:
+SELECT * FROM EXAM_ANSWERS EXAM_RESULTS USERS QUESTION USERS USERS USERS EXAM_RESULT_ID QUESTION_ID ID ID ID [42000-224]
+2026-10-19 04:58:40.217080+05:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM EXAM_ANSWERS EXAM_RESULTS [*]USERS QUESTION USERS USERS USERS EXAM_RESULT_ID QUESTION_ID ID ID ID"; SQL statement:
+SELECT * FROM EXAM_ANSWERS EXAM_RESULTS USERS QUESTION USERS USERS USERS EXAM_RESULT_ID QUESTION_ID ID ID ID [42000-224]
