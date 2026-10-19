@@ -118,7 +118,7 @@ Screenshots are stored in the `screenshots/` directory.
 | UI Framework | Bootstrap 5 |
 | Charts | Chart.js (optional) |
 | ORM | Hibernate / Spring Data JPA |
-| Database | PostgreSQL 14+ |
+| Database | Neon Database |
 | Build Tool | Maven |
 | File Storage | Local file system |
 | Version Control | Git / GitHub |
