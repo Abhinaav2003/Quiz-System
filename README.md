@@ -81,28 +81,28 @@ Screenshots are stored in the `screenshots/` directory.
   <img src="./screenshots/Front%20Page.png" alt="Front page" width="90%">
 </p>
 
+### Create Account
+
+<p align="center">
+  <img src="./screenshots/Create%20Page.png" alt="Question management page" width="90%">
+</p>
+
+### Login Account
+
+<p align="center">
+  <img src="./screenshots/Login%20Page.png" alt="Student dashboard" width="90%">
+</p>
+
 ### Admin Dashboard
 
 <p align="center">
   <img src="./screenshots/Admin%20Page.png" alt="Admin dashboard" width="90%">
 </p>
 
-### Exam Management
+### Manage Quiz
 
 <p align="center">
-  <img src="./screenshots/Questions%20Page.png" alt="Exam management page" width="90%">
-</p>
-
-### Question Management
-
-<p align="center">
-  <img src="./screenshots/ManageQuestion%20Page.png" alt="Question management page" width="90%">
-</p>
-
-### Student Dashboard
-
-<p align="center">
-  <img src="./screenshots/Student%20Page.png" alt="Student dashboard" width="90%">
+  <img src="./screenshots/Manage%20Page.png" alt="Exam management page" width="90%">
 </p>
 
 ---
@@ -145,7 +145,6 @@ online-exam-system/
 │   │       ├── static/
 │   │       │   ├── css/
 │   │       │   ├── js/
-│   │       │   └── images/
 │   │       └── application.properties
 │   └── test/
 ├── screenshots/
