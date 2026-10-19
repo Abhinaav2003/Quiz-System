@@ -42,10 +42,10 @@ The platform covers the full examination lifecycle: exam and question management
 
 ## Features
 
+### Project Flow Diagram
+
 <p align="center">
-  <a href="https://gitdiagram.com/abhinaav2003/quiz-system?utm_source=readme&utm_medium=badge">
-    <img src="https://gitdiagram.com/diagram-badge.svg" alt="Architecture diagram" />
-  </a>
+  <img src="./screenshots/Flow%20Diagram.png" alt="Front page" width="90%">
 </p>
 
 ### Administrator
