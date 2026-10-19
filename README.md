@@ -111,7 +111,7 @@ Screenshots are stored in the `screenshots/` directory.
 
 | Layer | Technology |
 |---|---|
-| Language | Java 17+ |
+| Language | Java 17 |
 | Backend Framework | Spring Boot 3.x |
 | Security | Spring Security 6 |
 | Templating | Thymeleaf, HTML5, CSS3 |
@@ -120,7 +120,6 @@ Screenshots are stored in the `screenshots/` directory.
 | ORM | Hibernate / Spring Data JPA |
 | Database | Neon Database |
 | Build Tool | Maven |
-| File Storage | Local file system |
 | Version Control | Git / GitHub |
 
 ---
@@ -181,42 +180,6 @@ cd online-exam-system-master-main
 
 > If `pom.xml` is located in a nested directory, change into that directory before running Maven commands.
 
-**2. Set up PostgreSQL**
-
-Create a database for the application. Using `psql`:
-
-```bash
-psql -U postgres -c "CREATE DATABASE examdb;"
-```
-
-Or start a disposable PostgreSQL instance with Docker:
-
-```bash
-docker run --name exam-postgres \
-  -e POSTGRES_DB=examdb \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=your_password \
-  -p 5432:5432 \
-  -d postgres:16
-```
-
-**3. Set database credentials**
-
-The application reads credentials from environment variables (see [Configuration](#configuration)).
-
-Windows (PowerShell):
-
-```powershell
-$env:DB_USERNAME = "postgres"
-$env:DB_PASSWORD = "your_password"
-```
-
-macOS / Linux:
-
-```bash
-export DB_USERNAME=postgres
-export DB_PASSWORD=your_password
-```
 
 **4. Build the application**
 
@@ -256,50 +219,6 @@ Navigate to **http://localhost:8080**. The port may differ if `server.port` is c
 
 The application uses PostgreSQL for persistence. Tables are created and updated automatically by Hibernate on startup.
 
-### Maven dependency
-
-Remove the H2 dependency from `pom.xml` and add the PostgreSQL JDBC driver:
-
-```xml
-<dependency>
-    <groupId>org.postgresql</groupId>
-    <artifactId>postgresql</artifactId>
-    <scope>runtime</scope>
-</dependency>
-```
-
-### Example `application.properties`
-
-Use this as a reference and adapt it to your project's dependencies and existing settings.
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/examdb
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.datasource.username=${DB_USERNAME:postgres}
-spring.datasource.password=${DB_PASSWORD}
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.open-in-view=false
-
-server.port=8080
-```
-
-### Environment variables
-
-| Variable | Description | Default |
-|---|---|---|
-| `DB_USERNAME` | PostgreSQL user | `postgres` |
-| `DB_PASSWORD` | PostgreSQL password | none (required) |
-
-
-### Configuration Notes
-
-- The database named in `spring.datasource.url` must exist before the application starts; Hibernate creates tables, not the database itself.
-- `spring.jpa.hibernate.ddl-auto=update` is suited to development. Use a managed migration tool such as Flyway or Liquibase in production.
-- Do not commit real credentials to version control. Externalize secrets through environment variables or a secrets manager.
-- For production, create a dedicated database user with only the privileges the application needs instead of using the `postgres` superuser.
-
----
 
 ## Default Administrator Account
 
@@ -335,18 +254,6 @@ Remove-Item -Recurse -Force target -ErrorAction SilentlyContinue
 
 This removes generated build artifacts in `target/` and rebuilds the project. It does not touch the PostgreSQL database or uploaded profile pictures.
 
-**Useful PostgreSQL commands**
-
-| Task | Command |
-|---|---|
-| Connect to the database | `psql -U postgres -d examdb` |
-| List tables | `\dt` (inside `psql`) |
-| Back up the database | `pg_dump -U postgres examdb > examdb_backup.sql` |
-| Restore from backup | `psql -U postgres -d examdb < examdb_backup.sql` |
-| Stop the Docker container | `docker stop exam-postgres` |
-| Start the Docker container | `docker start exam-postgres` |
-
----
 
 ## Roadmap
 
