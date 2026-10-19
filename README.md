@@ -1,13 +1,9 @@
 ﻿# Online Exam System
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Java-17-blue?style=flat-square&logo=openjdk&logoColor=white" alt="Java 17">
-  <img src="https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot 3">
-  <img src="https://img.shields.io/badge/Spring%20Security-6.x-green?style=flat-square&logo=springsecurity&logoColor=white" alt="Spring Security 6">
-  <img src="https://img.shields.io/badge/JPA-Hibernate-red?style=flat-square" alt="JPA / Hibernate">
-  <img src="https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Build-Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white" alt="Maven">
+  <img src="https://skillicons.dev/icons?i=c,cpp,cs,java,py,spring,hibernate,postgres,maven" alt="Tech stack icons" />
 </p>
+
 
 <p align="center">
   A secure web-based examination platform built with Spring Boot, Spring Security, Thymeleaf, Bootstrap 5, and PostgreSQL.
