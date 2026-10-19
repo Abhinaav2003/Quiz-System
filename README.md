@@ -1,7 +1,7 @@
 ﻿# Online Exam System
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=c,cpp,cs,java,py,spring,hibernate,postgres,maven" alt="Tech stack icons" />
+  <img src="https://skillicons.dev/icons?i=java,spring,hibernate,postgres,maven" alt="Tech stack icons" />
 </p>
 
 
