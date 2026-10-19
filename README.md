@@ -42,6 +42,12 @@ The platform covers the full examination lifecycle: exam and question management
 
 ## Features
 
+<p align="center">
+  <a href="https://gitdiagram.com/abhinaav2003/quiz-system?utm_source=readme&utm_medium=badge">
+    <img src="https://gitdiagram.com/diagram-badge.svg" alt="Architecture diagram" />
+  </a>
+</p>
+
 ### Administrator
 
 - Secure authentication with role-based access control
