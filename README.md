@@ -5,12 +5,12 @@
   <img src="https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot 3">
   <img src="https://img.shields.io/badge/Spring%20Security-6.x-green?style=flat-square&logo=springsecurity&logoColor=white" alt="Spring Security 6">
   <img src="https://img.shields.io/badge/JPA-Hibernate-red?style=flat-square" alt="JPA / Hibernate">
-  <img src="https://img.shields.io/badge/Database-H2-lightgrey?style=flat-square&logo=h2&logoColor=white" alt="H2 Database">
+  <img src="https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Build-Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white" alt="Maven">
 </p>
 
 <p align="center">
-  A secure web-based examination platform built with Spring Boot, Spring Security, Thymeleaf, and Bootstrap 5.
+  A secure web-based examination platform built with Spring Boot, Spring Security, Thymeleaf, Bootstrap 5, and PostgreSQL.
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@
 
 Online Exam System is a web application that gives administrators a central place to create and manage examinations, and gives students a straightforward way to take them online.
 
-The platform covers the full examination lifecycle: exam and question management, timed assessments, automatic scoring, student account administration, and result tracking. It also serves as a practical reference implementation of Spring Boot, Spring Security, Spring Data JPA, Hibernate, and Thymeleaf working together.
+The platform covers the full examination lifecycle: exam and question management, timed assessments, automatic scoring, student account administration, and result tracking. It also serves as a practical reference implementation of Spring Boot, Spring Security, Spring Data JPA, Hibernate, PostgreSQL, and Thymeleaf working together.
 
 ---
 
@@ -118,7 +118,7 @@ Screenshots are stored in the `screenshots/` directory.
 | UI Framework | Bootstrap 5 |
 | Charts | Chart.js (optional) |
 | ORM | Hibernate / Spring Data JPA |
-| Database | H2 (file-based) |
+| Database | PostgreSQL 14+ |
 | Build Tool | Maven |
 | File Storage | Local file system |
 | Version Control | Git / GitHub |
@@ -149,7 +149,6 @@ online-exam-system/
 │   │       │   └── images/
 │   │       └── application.properties
 │   └── test/
-├── data/
 ├── screenshots/
 ├── pom.xml
 ├── mvnw
@@ -166,6 +165,7 @@ online-exam-system/
 | Requirement | Notes |
 |---|---|
 | JDK 17 or higher | Verify with `java -version` |
+| PostgreSQL 14 or higher | Local install or Docker; verify with `psql --version` |
 | Maven | Optional; the included Maven Wrapper is recommended |
 | Git | Required to clone the repository |
 | IDE | VS Code, IntelliJ IDEA, or Eclipse |
@@ -181,7 +181,44 @@ cd online-exam-system-master-main
 
 > If `pom.xml` is located in a nested directory, change into that directory before running Maven commands.
 
-**2. Build the application**
+**2. Set up PostgreSQL**
+
+Create a database for the application. Using `psql`:
+
+```bash
+psql -U postgres -c "CREATE DATABASE examdb;"
+```
+
+Or start a disposable PostgreSQL instance with Docker:
+
+```bash
+docker run --name exam-postgres \
+  -e POSTGRES_DB=examdb \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=your_password \
+  -p 5432:5432 \
+  -d postgres:16
+```
+
+**3. Set database credentials**
+
+The application reads credentials from environment variables (see [Configuration](#configuration)).
+
+Windows (PowerShell):
+
+```powershell
+$env:DB_USERNAME = "postgres"
+$env:DB_PASSWORD = "your_password"
+```
+
+macOS / Linux:
+
+```bash
+export DB_USERNAME=postgres
+export DB_PASSWORD=your_password
+```
+
+**4. Build the application**
 
 Windows (PowerShell):
 
@@ -201,7 +238,7 @@ Using a locally installed Maven:
 mvn clean package -DskipTests
 ```
 
-**3. Run the application**
+**5. Run the application**
 
 ```powershell
 .\mvnw.cmd spring-boot:run
@@ -209,7 +246,7 @@ mvn clean package -DskipTests
 
 Alternatively, run `OnlineExamApplication.java` directly from your IDE.
 
-**4. Open the application**
+**6. Open the application**
 
 Navigate to **http://localhost:8080**. The port may differ if `server.port` is changed in `application.properties`.
 
@@ -217,44 +254,60 @@ Navigate to **http://localhost:8080**. The port may differ if `server.port` is c
 
 ## Configuration
 
-The application uses a file-based H2 database, so data persists locally between restarts.
+The application uses PostgreSQL for persistence. Tables are created and updated automatically by Hibernate on startup.
+
+### Maven dependency
+
+Remove the H2 dependency from `pom.xml` and add the PostgreSQL JDBC driver:
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
 
 ### Example `application.properties`
 
 Use this as a reference and adapt it to your project's dependencies and existing settings.
 
 ```properties
-spring.datasource.url=jdbc:h2:file:./data/examdb
-spring.datasource.driver-class-name=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=password
+spring.datasource.url=jdbc:postgresql://localhost:5432/examdb
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD}
 
 spring.jpa.hibernate.ddl-auto=update
-
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2-console
+spring.jpa.open-in-view=false
 
 server.port=8080
 ```
 
-### H2 Console
+### Environment variables
 
-When enabled and permitted by Spring Security, the console is available at **http://localhost:8080/h2-console**.
+| Variable | Description | Default |
+|---|---|---|
+| `DB_USERNAME` | PostgreSQL user | `postgres` |
+| `DB_PASSWORD` | PostgreSQL password | none (required) |
 
-| Setting | Value |
-|---|---|
-| JDBC URL | `jdbc:h2:file:./data/examdb` |
-| Username | `sa` |
-| Password | `password` |
-| Driver Class | `org.h2.Driver` |
+### Removing H2 from an existing setup
+
+If you are migrating from the earlier H2 configuration:
+
+- Delete the `com.h2database:h2` dependency from `pom.xml`.
+- Remove all `spring.h2.console.*` properties from `application.properties`.
+- Remove any `/h2-console/**` matchers and `frameOptions` overrides from the Spring Security configuration.
+- Delete the local `data/` directory containing the old H2 database files, if you no longer need them.
+
+Existing H2 data is not migrated automatically. Export it first if you need to keep it.
 
 ### Configuration Notes
 
-- The JDBC URL entered in the console must match `spring.datasource.url` exactly.
-- The console path must match `spring.h2.console.path`.
-- Spring Security may require explicit configuration to allow access to the console.
+- The database named in `spring.datasource.url` must exist before the application starts; Hibernate creates tables, not the database itself.
 - `spring.jpa.hibernate.ddl-auto=update` is suited to development. Use a managed migration tool such as Flyway or Liquibase in production.
 - Do not commit real credentials to version control. Externalize secrets through environment variables or a secrets manager.
+- For production, create a dedicated database user with only the privileges the application needs instead of using the `postgres` superuser.
 
 ---
 
@@ -290,7 +343,18 @@ Remove-Item -Recurse -Force target -ErrorAction SilentlyContinue
 .\mvnw.cmd spring-boot:run
 ```
 
-This removes generated build artifacts in `target/` and rebuilds the project. It does not intentionally delete the H2 database or uploaded profile pictures.
+This removes generated build artifacts in `target/` and rebuilds the project. It does not touch the PostgreSQL database or uploaded profile pictures.
+
+**Useful PostgreSQL commands**
+
+| Task | Command |
+|---|---|
+| Connect to the database | `psql -U postgres -d examdb` |
+| List tables | `\dt` (inside `psql`) |
+| Back up the database | `pg_dump -U postgres examdb > examdb_backup.sql` |
+| Restore from backup | `psql -U postgres -d examdb < examdb_backup.sql` |
+| Stop the Docker container | `docker stop exam-postgres` |
+| Start the Docker container | `docker start exam-postgres` |
 
 ---
 
@@ -303,8 +367,8 @@ Planned and potential enhancements:
 - [ ] Exam scheduling and access windows
 - [ ] Exportable reports (PDF / CSV)
 - [ ] Email notifications and password recovery
-- [ ] Migration to a production-grade database (PostgreSQL / MySQL)
-- [ ] Docker support and CI/CD pipeline
+- [ ] Schema versioning with Flyway or Liquibase
+- [ ] Docker Compose setup (application + PostgreSQL) and CI/CD pipeline
 
 ---
 
@@ -326,10 +390,10 @@ Add your license information here (for example, MIT) and include a corresponding
 ---
 
 ## Authors
- 
+
 This project was designed and developed by:
- 
+
 - **Abhinav Tiwari**
 - **Anshu Rajput**
- 
+
 ---
