@@ -291,16 +291,6 @@ server.port=8080
 | `DB_USERNAME` | PostgreSQL user | `postgres` |
 | `DB_PASSWORD` | PostgreSQL password | none (required) |
 
-### Removing H2 from an existing setup
-
-If you are migrating from the earlier H2 configuration:
-
-- Delete the `com.h2database:h2` dependency from `pom.xml`.
-- Remove all `spring.h2.console.*` properties from `application.properties`.
-- Remove any `/h2-console/**` matchers and `frameOptions` overrides from the Spring Security configuration.
-- Delete the local `data/` directory containing the old H2 database files, if you no longer need them.
-
-Existing H2 data is not migrated automatically. Export it first if you need to keep it.
 
 ### Configuration Notes
 
@@ -317,8 +307,8 @@ The application may create an administrator account on startup. Check `OnlineExa
 
 | Field | Example Value |
 |---|---|
-| Username | `admin` |
-| Password | `adminpass` |
+| Username | `------` |
+| Password | `------` |
 
 These values are illustrative and have not been independently verified against the current source.
 
