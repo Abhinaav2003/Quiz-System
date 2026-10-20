@@ -176,6 +176,22 @@
             overflow-wrap: anywhere;
         }
 
+        .duration {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            flex-wrap: wrap;
+            background: #eef2ff;
+            color: #3730a3;
+            border-radius: 7px;
+            padding: .25rem .5rem;
+            font-weight: 700;
+        }
+
+        .duration i {
+            color: #3730a3;
+        }
+
         .empty {
             background: var(--surface);
             border: 2px dashed var(--line);
@@ -210,13 +226,11 @@
 
 <body>
 
-    <!-- Navigation bar -->
     <div th:replace="~{fragments :: navbar}"></div>
 
     <main class="page">
         <div class="container">
 
-            <!-- Back link -->
             <div class="back-link mb-3">
                 <a th:href="@{/admin/manage-exams}">
                     <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
@@ -224,14 +238,12 @@
                 </a>
             </div>
 
-            <!-- Exam title -->
             <h1 th:text="${exam.title}">Exam Results</h1>
 
             <p class="sub">
-                View student scores, percentages, and submission timestamps.
+                View student scores, percentages, quiz duration, and submission timestamps.
             </p>
 
-            <!-- Summary -->
             <div class="results-summary"
                  th:unless="${#lists.isEmpty(results)}">
 
@@ -252,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- Result cards -->
             <div class="row g-3"
                  th:unless="${#lists.isEmpty(results)}">
 
@@ -261,7 +272,6 @@
 
                     <article class="result-card">
 
-                        <!-- Student details and percentage -->
                         <div class="result-top">
 
                             <div>
@@ -276,9 +286,8 @@
                                 </p>
                             </div>
 
-                            <!-- Percentage -->
                             <th:block
-                                th:if="${result.totalMarks != null and result.totalMarks > 0}"
+                                th:if="${result.totalMarks > 0}"
                                 th:with="percentage=${result.scoreAchieved * 100.0 / result.totalMarks}">
 
                                 <span class="pct"
@@ -295,36 +304,47 @@
                             </th:block>
 
                             <span class="pct na"
-                                  th:if="${result.totalMarks == null or result.totalMarks <= 0}">
+                                  th:if="${result.totalMarks <= 0}">
                                 N/A
                             </span>
 
                         </div>
 
-                        <!-- Score and timestamp -->
                         <div class="result-meta">
 
+                            <!-- Score -->
                             <div>
-                                <i class="bi bi-award-fill"
-                                   aria-hidden="true"></i>
-
+                                <i class="bi bi-award-fill" aria-hidden="true"></i>
                                 Score:
-                                <strong th:text="${result.scoreAchieved}">
-                                    15
-                                </strong>
-
+                                <strong th:text="${result.scoreAchieved}">15</strong>
                                 /
-                                <strong th:text="${result.totalMarks}">
-                                    20
-                                </strong>
+                                <strong th:text="${result.totalMarks}">20</strong>
                                 marks
+                            </div>
+
+                            <!-- Time taken -->
+                            <div>
+                                <i class="bi bi-stopwatch-fill" aria-hidden="true"></i>
+                                <strong>Time Taken:</strong>
+
+                                <span class="duration"
+                                      th:if="${result.durationSeconds != null and result.durationSeconds > 0}"
+                                      th:text="${(result.durationSeconds / 60) + ' min ' + (result.durationSeconds % 60) + ' sec'}">
+                                    2 min 5 sec
+                                </span>
+
+                                <span th:if="${result.durationSeconds != null and result.durationSeconds == 0}">
+                                    Less than 1 second or timing unavailable
+                                </span>
+
+                                <span th:if="${result.durationSeconds == null}">
+                                    Not available
+                                </span>
                             </div>
 
                             <!-- Submission date -->
                             <div class="timestamp">
-                                <i class="bi bi-calendar-event"
-                                   aria-hidden="true"></i>
-
+                                <i class="bi bi-calendar-event" aria-hidden="true"></i>
                                 <strong>Submission date:</strong>
 
                                 <time th:if="${result.submissionTime != null}"
@@ -340,9 +360,7 @@
 
                             <!-- Exact submission time -->
                             <div class="timestamp">
-                                <i class="bi bi-clock-fill"
-                                   aria-hidden="true"></i>
-
+                                <i class="bi bi-clock-fill" aria-hidden="true"></i>
                                 <strong>Submission time:</strong>
 
                                 <time th:if="${result.submissionTime != null}"
@@ -361,12 +379,10 @@
                 </div>
             </div>
 
-            <!-- Empty state -->
             <div class="empty"
                  th:if="${#lists.isEmpty(results)}">
 
-                <i class="bi bi-clipboard-data"
-                   aria-hidden="true"></i>
+                <i class="bi bi-clipboard-data" aria-hidden="true"></i>
 
                 <h2 class="h5 mt-3">No results available</h2>
 

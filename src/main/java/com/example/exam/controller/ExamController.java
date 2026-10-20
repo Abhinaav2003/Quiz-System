@@ -3,6 +3,8 @@ package com.example.exam.controller;
 import com.example.exam.model.*;
 import com.example.exam.repository.*;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,7 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,13 +38,12 @@ public class ExamController {
     @Autowired
     private ExamAnswerRepository examAnswerRepository;
 
-    // Display the exam page
     @GetMapping("/{examId}")
     public String getExamPage(
             @PathVariable Long examId,
-            Model model) {
+            Model model,
+            HttpSession session) {
 
-        // Get the logged-in student
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -52,7 +55,6 @@ public class ExamController {
 
         model.addAttribute("student", student);
 
-        // Get the exam
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
@@ -60,23 +62,35 @@ public class ExamController {
 
         model.addAttribute("exam", exam);
 
-        // Load exam questions
         List<Question> questions = exam.getQuestions();
         questions.size();
 
         model.addAttribute("questions", questions);
 
+        // Record the start time for this exam in the current session.
+        @SuppressWarnings("unchecked")
+        Map<Long, LocalDateTime> startTimes =
+                (Map<Long, LocalDateTime>)
+                        session.getAttribute("examStartTimes");
+
+        if (startTimes == null) {
+            startTimes = new HashMap<>();
+            session.setAttribute("examStartTimes", startTimes);
+        }
+
+        // Set the start time only if this exam has not already started.
+        startTimes.putIfAbsent(examId, LocalDateTime.now());
+
         return "student/exam_page";
     }
 
-    // Submit the exam
     @PostMapping("/submit")
     public String submitExam(
             @RequestParam Long examId,
             @RequestParam Map<String, String> submittedAnswers,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        // Get the logged-in student
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -86,52 +100,63 @@ public class ExamController {
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        // Get the exam
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "Invalid exam Id: " + examId));
 
+        // Retrieve the start time recorded when the exam page opened.
+        @SuppressWarnings("unchecked")
+        Map<Long, LocalDateTime> startTimes =
+                (Map<Long, LocalDateTime>)
+                        session.getAttribute("examStartTimes");
+
+        LocalDateTime submissionTime = LocalDateTime.now();
+        LocalDateTime startTime = null;
+
+        if (startTimes != null) {
+            startTime = startTimes.remove(examId);
+        }
+
+        // Prevent a negative duration if the start time is unavailable.
+        long durationSeconds = startTime == null
+                ? 0L
+                : Math.max(0L,
+                    Duration.between(startTime, submissionTime).getSeconds());
+
         int totalMarks = 0;
         int scoreAchieved = 0;
 
-        // Create the result
         ExamResult result = new ExamResult();
 
         result.setStudent(student);
         result.setExam(exam);
+        result.setStartTime(startTime);
+        result.setSubmissionTime(submissionTime);
+        result.setDurationSeconds(durationSeconds);
 
-        // Record the submission date and time
-        result.setSubmissionTime(LocalDateTime.now());
-
-        // Save the result to generate its ID
         examResultRepository.save(result);
 
-        // Process each question
         for (Question question : exam.getQuestions()) {
 
             totalMarks += question.getMarks();
 
             String answerKey = "q_" + question.getId();
-
             int selectedOption = 0;
 
             if (submittedAnswers.containsKey(answerKey)) {
                 try {
                     selectedOption = Integer.parseInt(
                             submittedAnswers.get(answerKey));
-
                 } catch (NumberFormatException e) {
                     selectedOption = 0;
                 }
 
-                // Calculate the score
                 if (selectedOption == question.getCorrectAnswer()) {
                     scoreAchieved += question.getMarks();
                 }
             }
 
-            // Save the student's answer
             ExamAnswer examAnswer =
                     new ExamAnswer(result, question, selectedOption);
 
@@ -139,21 +164,14 @@ public class ExamController {
             result.addAnswer(examAnswer);
         }
 
-        // Update and save the final result
         result.setScoreAchieved(scoreAchieved);
         result.setTotalMarks(totalMarks);
 
         examResultRepository.save(result);
 
-        // Send score information to the result page
-        redirectAttributes.addFlashAttribute(
-                "score", scoreAchieved);
-
-        redirectAttributes.addFlashAttribute(
-                "total", totalMarks);
-
-        redirectAttributes.addFlashAttribute(
-                "resultId", result.getId());
+        redirectAttributes.addFlashAttribute("score", scoreAchieved);
+        redirectAttributes.addFlashAttribute("total", totalMarks);
+        redirectAttributes.addFlashAttribute("resultId", result.getId());
 
         return "redirect:/student/result";
     }
