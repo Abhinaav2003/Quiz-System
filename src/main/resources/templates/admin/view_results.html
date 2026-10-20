@@ -86,6 +86,11 @@
         <h1 th:text="${exam.title}">Exam results</h1>
         <p class="sub">All student submissions and scores for this exam.</p>
 
+        <a th:href="@{/leaderboard/{id}(id=${exam.id})}" class="btn btn-ghost mb-3"
+           style="font-weight:600; border:2px solid var(--ink); border-radius:10px; color:var(--ink); min-height:44px; display:inline-flex; align-items:center;">
+            <i class="bi bi-trophy-fill me-2"></i>View leaderboard
+        </a>
+
         <div class="row g-3" th:unless="${#lists.isEmpty(results)}">
             <div class="col-12 col-md-6 col-xl-4" th:each="result : ${results}">
                 <div class="result-card">
