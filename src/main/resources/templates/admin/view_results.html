@@ -18,7 +18,7 @@
             --ink: #101828;
             --muted: #475467;
             --paper: #f3f5f9;
-            --surface: #ffffff;
+            --surface: #fff;
             --brand: #3b3fd8;
             --ok: #12805c;
             --bad: #b42318;
@@ -30,15 +30,10 @@
         }
 
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
             color: var(--ink);
             background: var(--paper);
             min-height: 100vh;
-        }
-
-        :focus-visible {
-            outline: 3px solid var(--brand);
-            outline-offset: 3px;
         }
 
         .page {
@@ -58,9 +53,8 @@
         .page h1 {
             font-size: clamp(1.5rem, 4vw, 2rem);
             font-weight: 800;
-            letter-spacing: -0.02em;
-            overflow-wrap: anywhere;
             margin: 1rem 0 .4rem;
+            overflow-wrap: anywhere;
         }
 
         .sub {
@@ -68,26 +62,39 @@
             margin-bottom: 1.5rem;
         }
 
-        .results-summary {
+        .results-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
             background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 12px;
             padding: 1rem;
             margin-bottom: 1.25rem;
+        }
+
+        .result-count {
+            font-weight: 700;
+        }
+
+        .sort-control {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            gap: .75rem;
+            gap: .6rem;
             flex-wrap: wrap;
         }
 
-        .results-summary strong {
-            font-size: 1.05rem;
+        .sort-control label {
+            font-size: .9rem;
+            font-weight: 600;
         }
 
-        .sort-label {
-            color: var(--muted);
-            font-size: .9rem;
+        .sort-control select {
+            width: auto;
+            min-width: 210px;
+            max-width: 100%;
         }
 
         .result-card {
@@ -119,7 +126,7 @@
             overflow-wrap: anywhere;
         }
 
-        .student-email {
+        .student-username {
             color: var(--muted);
             font-size: .9rem;
             margin: .3rem 0 0;
@@ -155,7 +162,7 @@
         .result-meta {
             display: flex;
             flex-direction: column;
-            gap: .65rem;
+            gap: .8rem;
             margin-top: 1rem;
             padding-top: 1rem;
             border-top: 1px solid var(--line);
@@ -172,15 +179,10 @@
             color: var(--ink);
         }
 
-        .timestamp {
-            overflow-wrap: anywhere;
-        }
-
         .duration {
             display: inline-flex;
             align-items: center;
             gap: .35rem;
-            flex-wrap: wrap;
             background: #eef2ff;
             color: #3730a3;
             border-radius: 7px;
@@ -216,6 +218,18 @@
             }
         }
 
+        @media (max-width: 480px) {
+            .sort-control {
+                width: 100%;
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .sort-control select {
+                width: 100%;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .result-card {
                 transition: none;
@@ -241,48 +255,60 @@
             <h1 th:text="${exam.title}">Exam Results</h1>
 
             <p class="sub">
-                View student scores, percentages, quiz duration, and submission timestamps.
+                View student scores, percentages, and quiz duration.
             </p>
 
-            <div class="results-summary"
+            <!-- Sorting toolbar -->
+            <div class="results-toolbar"
                  th:unless="${#lists.isEmpty(results)}">
 
-                <div>
+                <div class="result-count">
                     <i class="bi bi-people-fill me-2"
                        style="color: var(--brand)"
                        aria-hidden="true"></i>
 
-                    <strong>
-                        <span th:text="${#lists.size(results)}">0</span>
-                        Submissions
-                    </strong>
+                    Total submissions:
+                    <span th:text="${#lists.size(results)}">0</span>
                 </div>
 
-                <div class="sort-label">
-                    <i class="bi bi-sort-down me-1" aria-hidden="true"></i>
-                    Sorted by latest submission first
+                <div class="sort-control">
+                    <label for="sortResults">
+                        <i class="bi bi-sort-down me-1" aria-hidden="true"></i>
+                        Sort results:
+                    </label>
+
+                    <select id="sortResults" class="form-select">
+                        <option value="default">Default order</option>
+                        <option value="marks-desc">Marks: Highest to Lowest</option>
+                        <option value="marks-asc">Marks: Lowest to Highest</option>
+                        <option value="time-asc">Time Taken: Fastest First</option>
+                        <option value="time-desc">Time Taken: Slowest First</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="row g-3"
+            <!-- Results cards -->
+            <div id="resultsContainer"
+                 class="row g-3"
                  th:unless="${#lists.isEmpty(results)}">
 
-                <div class="col-12 col-md-6 col-xl-4"
-                     th:each="result : ${results}">
+                <div class="result-item col-12 col-md-6 col-xl-4"
+                     th:each="result : ${results}"
+                     th:attr="data-score=${result.scoreAchieved},
+                              data-duration=${result.durationSeconds != null and result.durationSeconds > 0 ? result.durationSeconds : -1}">
 
                     <article class="result-card">
 
                         <div class="result-top">
-
                             <div>
                                 <p class="student-name"
                                    th:text="${result.student.fullName}">
                                     Student Name
                                 </p>
 
-                                <p class="student-email"
+                                <p class="student-username"
                                    th:text="${result.student.username}">
-                                    student@example.com
+                                    student
                                 </p>
                             </div>
 
@@ -307,22 +333,19 @@
                                   th:if="${result.totalMarks <= 0}">
                                 N/A
                             </span>
-
                         </div>
 
                         <div class="result-meta">
 
-                            <!-- Score -->
                             <div>
                                 <i class="bi bi-award-fill" aria-hidden="true"></i>
-                                Score:
+                                <strong>Marks:</strong>
+
                                 <strong th:text="${result.scoreAchieved}">15</strong>
                                 /
-                                <strong th:text="${result.totalMarks}">20</strong>
-                                marks
+                                <span th:text="${result.totalMarks}">20</span>
                             </div>
 
-                            <!-- Time taken -->
                             <div>
                                 <i class="bi bi-stopwatch-fill" aria-hidden="true"></i>
                                 <strong>Time Taken:</strong>
@@ -333,52 +356,17 @@
                                     2 min 5 sec
                                 </span>
 
-                                <span th:if="${result.durationSeconds != null and result.durationSeconds == 0}">
-                                    Less than 1 second or timing unavailable
-                                </span>
-
-                                <span th:if="${result.durationSeconds == null}">
-                                    Not available
-                                </span>
-                            </div>
-
-                            <!-- Submission date -->
-                            <div class="timestamp">
-                                <i class="bi bi-calendar-event" aria-hidden="true"></i>
-                                <strong>Submission date:</strong>
-
-                                <time th:if="${result.submissionTime != null}"
-                                      th:datetime="${#temporals.format(result.submissionTime, 'yyyy-MM-dd''T''HH:mm:ss')}"
-                                      th:text="${#temporals.format(result.submissionTime, 'dd MMM yyyy')}">
-                                    20 Oct 2026
-                                </time>
-
-                                <span th:if="${result.submissionTime == null}">
-                                    Not available
-                                </span>
-                            </div>
-
-                            <!-- Exact submission time -->
-                            <div class="timestamp">
-                                <i class="bi bi-clock-fill" aria-hidden="true"></i>
-                                <strong>Submission time:</strong>
-
-                                <time th:if="${result.submissionTime != null}"
-                                      th:text="${#temporals.format(result.submissionTime, 'hh:mm:ss a')}">
-                                    08:30:00 PM
-                                </time>
-
-                                <span th:if="${result.submissionTime == null}">
+                                <span th:if="${result.durationSeconds == null or result.durationSeconds <= 0}">
                                     Not available
                                 </span>
                             </div>
 
                         </div>
-
                     </article>
                 </div>
             </div>
 
+            <!-- Empty state -->
             <div class="empty"
                  th:if="${#lists.isEmpty(results)}">
 
@@ -389,11 +377,77 @@
                 <p class="mb-0">
                     No student has submitted this exam yet.
                 </p>
-
             </div>
 
         </div>
     </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const sortSelect = document.getElementById("sortResults");
+            const container = document.getElementById("resultsContainer");
+
+            if (!sortSelect || !container) {
+                return;
+            }
+
+            // Save the original order for the Default option.
+            const originalItems = Array.from(
+                container.querySelectorAll(".result-item")
+            );
+
+            function sortResults() {
+                const selectedSort = sortSelect.value;
+                const items = Array.from(originalItems);
+
+                items.sort(function (a, b) {
+                    const scoreA = Number(a.dataset.score);
+                    const scoreB = Number(b.dataset.score);
+
+                    const durationA = Number(a.dataset.duration);
+                    const durationB = Number(b.dataset.duration);
+
+                    if (selectedSort === "marks-desc") {
+                        return scoreB - scoreA;
+                    }
+
+                    if (selectedSort === "marks-asc") {
+                        return scoreA - scoreB;
+                    }
+
+                    if (selectedSort === "time-asc") {
+                        // Unknown durations always appear last.
+                        if (durationA < 0 && durationB >= 0) return 1;
+                        if (durationB < 0 && durationA >= 0) return -1;
+
+                        if (durationA < 0 && durationB < 0) return 0;
+
+                        return durationA - durationB;
+                    }
+
+                    if (selectedSort === "time-desc") {
+                        // Unknown durations always appear last.
+                        if (durationA < 0 && durationB >= 0) return 1;
+                        if (durationB < 0 && durationA >= 0) return -1;
+
+                        if (durationA < 0 && durationB < 0) return 0;
+
+                        return durationB - durationA;
+                    }
+
+                    // Restore the original server-rendered order.
+                    return originalItems.indexOf(a) -
+                           originalItems.indexOf(b);
+                });
+
+                items.forEach(function (item) {
+                    container.appendChild(item);
+                });
+            }
+
+            sortSelect.addEventListener("change", sortResults);
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

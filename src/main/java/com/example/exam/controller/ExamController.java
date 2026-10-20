@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,9 @@ import java.util.Map;
 @Controller
 @RequestMapping("/exam")
 public class ExamController {
+
+    private static final ZoneId INDIA_ZONE =
+            ZoneId.of("Asia/Kolkata");
 
     @Autowired
     private ExamRepository examRepository;
@@ -38,6 +42,7 @@ public class ExamController {
     @Autowired
     private ExamAnswerRepository examAnswerRepository;
 
+    // Display the exam page and record its start time
     @GetMapping("/{examId}")
     public String getExamPage(
             @PathVariable Long examId,
@@ -62,12 +67,13 @@ public class ExamController {
 
         model.addAttribute("exam", exam);
 
+        // Load exam questions
         List<Question> questions = exam.getQuestions();
         questions.size();
 
         model.addAttribute("questions", questions);
 
-        // Record the start time for this exam in the current session.
+        // Get or create the session's exam start-time map
         @SuppressWarnings("unchecked")
         Map<Long, LocalDateTime> startTimes =
                 (Map<Long, LocalDateTime>)
@@ -78,12 +84,16 @@ public class ExamController {
             session.setAttribute("examStartTimes", startTimes);
         }
 
-        // Set the start time only if this exam has not already started.
-        startTimes.putIfAbsent(examId, LocalDateTime.now());
+        // Preserve the original start time on page refresh
+        startTimes.putIfAbsent(
+                examId,
+                LocalDateTime.now(INDIA_ZONE)
+        );
 
         return "student/exam_page";
     }
 
+    // Submit the exam and calculate the result
     @PostMapping("/submit")
     public String submitExam(
             @RequestParam Long examId,
@@ -105,28 +115,42 @@ public class ExamController {
                         new IllegalArgumentException(
                                 "Invalid exam Id: " + examId));
 
-        // Retrieve the start time recorded when the exam page opened.
+        // Record submission time in Indian Standard Time
+        LocalDateTime submissionTime =
+                LocalDateTime.now(INDIA_ZONE);
+
+        // Retrieve the exam start time
         @SuppressWarnings("unchecked")
         Map<Long, LocalDateTime> startTimes =
                 (Map<Long, LocalDateTime>)
                         session.getAttribute("examStartTimes");
 
-        LocalDateTime submissionTime = LocalDateTime.now();
         LocalDateTime startTime = null;
 
         if (startTimes != null) {
             startTime = startTimes.remove(examId);
+
+            // Remove the session attribute when no timers remain
+            if (startTimes.isEmpty()) {
+                session.removeAttribute("examStartTimes");
+            }
         }
 
-        // Prevent a negative duration if the start time is unavailable.
+        // Calculate duration in seconds
         long durationSeconds = startTime == null
                 ? 0L
-                : Math.max(0L,
-                    Duration.between(startTime, submissionTime).getSeconds());
+                : Math.max(
+                        0L,
+                        Duration.between(
+                                startTime,
+                                submissionTime
+                        ).getSeconds()
+                );
 
         int totalMarks = 0;
         int scoreAchieved = 0;
 
+        // Create the exam result
         ExamResult result = new ExamResult();
 
         result.setStudent(student);
@@ -135,8 +159,10 @@ public class ExamController {
         result.setSubmissionTime(submissionTime);
         result.setDurationSeconds(durationSeconds);
 
+        // Save first to generate the result ID
         examResultRepository.save(result);
 
+        // Evaluate answers
         for (Question question : exam.getQuestions()) {
 
             totalMarks += question.getMarks();
@@ -147,31 +173,45 @@ public class ExamController {
             if (submittedAnswers.containsKey(answerKey)) {
                 try {
                     selectedOption = Integer.parseInt(
-                            submittedAnswers.get(answerKey));
+                            submittedAnswers.get(answerKey)
+                    );
                 } catch (NumberFormatException e) {
                     selectedOption = 0;
                 }
 
+                // Award marks for a correct answer
                 if (selectedOption == question.getCorrectAnswer()) {
                     scoreAchieved += question.getMarks();
                 }
             }
 
+            // Save the selected answer
             ExamAnswer examAnswer =
-                    new ExamAnswer(result, question, selectedOption);
+                    new ExamAnswer(
+                            result,
+                            question,
+                            selectedOption
+                    );
 
             examAnswerRepository.save(examAnswer);
             result.addAnswer(examAnswer);
         }
 
+        // Update the final score
         result.setScoreAchieved(scoreAchieved);
         result.setTotalMarks(totalMarks);
 
         examResultRepository.save(result);
 
-        redirectAttributes.addFlashAttribute("score", scoreAchieved);
-        redirectAttributes.addFlashAttribute("total", totalMarks);
-        redirectAttributes.addFlashAttribute("resultId", result.getId());
+        // Send result information to the result page
+        redirectAttributes.addFlashAttribute(
+                "score", scoreAchieved);
+
+        redirectAttributes.addFlashAttribute(
+                "total", totalMarks);
+
+        redirectAttributes.addFlashAttribute(
+                "resultId", result.getId());
 
         return "redirect:/student/result";
     }
