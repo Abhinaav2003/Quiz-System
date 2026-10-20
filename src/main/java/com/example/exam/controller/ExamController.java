@@ -2,6 +2,7 @@ package com.example.exam.controller;
 
 import com.example.exam.model.*;
 import com.example.exam.repository.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,100 +28,133 @@ public class ExamController {
     @Autowired
     private UserRepository userRepository;
 
-
     @Autowired
     private QuestionRepository questionRepository;
 
     @Autowired
     private ExamAnswerRepository examAnswerRepository;
 
+    // Display the exam page
     @GetMapping("/{examId}")
-    public String getExamPage(@PathVariable Long examId, Model model) {
+    public String getExamPage(
+            @PathVariable Long examId,
+            Model model) {
 
-        // 1. Get the currently logged-in student
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName(); // This is the email
+        // Get the logged-in student
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String currentUsername = authentication.getName();
+
         User student = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Student not found"));
+
         model.addAttribute("student", student);
 
-        // 2. Get the exam
+        // Get the exam
         Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid exam Id:" + examId));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Invalid exam Id: " + examId));
+
         model.addAttribute("exam", exam);
 
-        // 3. Get the questions (force-load them)
+        // Load exam questions
         List<Question> questions = exam.getQuestions();
-        questions.size(); // This forces the collection to load
+        questions.size();
+
         model.addAttribute("questions", questions);
 
         return "student/exam_page";
     }
 
+    // Submit the exam
     @PostMapping("/submit")
-    public String submitExam(@RequestParam Long examId,
-                             @RequestParam Map<String, String> submittedAnswers,
-                             RedirectAttributes redirectAttributes) {
+    public String submitExam(
+            @RequestParam Long examId,
+            @RequestParam Map<String, String> submittedAnswers,
+            RedirectAttributes redirectAttributes) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Get the logged-in student
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
         String currentUsername = authentication.getName();
-        User student = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        User student = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        // Get the exam
         Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid exam Id:" + examId));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Invalid exam Id: " + examId));
 
         int totalMarks = 0;
         int scoreAchieved = 0;
 
-        // Create the result object *before* the loop
+        // Create the result
         ExamResult result = new ExamResult();
+
         result.setStudent(student);
         result.setExam(exam);
+
+        // Record the submission date and time
         result.setSubmissionTime(LocalDateTime.now());
 
-
-        // First, save the result to get an ID
+        // Save the result to generate its ID
         examResultRepository.save(result);
 
-        // Loop through all questions in the exam
+        // Process each question
         for (Question question : exam.getQuestions()) {
+
             totalMarks += question.getMarks();
+
             String answerKey = "q_" + question.getId();
 
-            int selectedOption = 0; // Default to 0 (unanswered)
+            int selectedOption = 0;
 
             if (submittedAnswers.containsKey(answerKey)) {
                 try {
-                    selectedOption = Integer.parseInt(submittedAnswers.get(answerKey));
+                    selectedOption = Integer.parseInt(
+                            submittedAnswers.get(answerKey));
+
                 } catch (NumberFormatException e) {
-                    selectedOption = 0; // Handle invalid data just in case
+                    selectedOption = 0;
                 }
 
+                // Calculate the score
                 if (selectedOption == question.getCorrectAnswer()) {
                     scoreAchieved += question.getMarks();
                 }
             }
 
+            // Save the student's answer
+            ExamAnswer examAnswer =
+                    new ExamAnswer(result, question, selectedOption);
 
-            ExamAnswer examAnswer = new ExamAnswer(result, question, selectedOption);
             examAnswerRepository.save(examAnswer);
             result.addAnswer(examAnswer);
         }
 
-        // Now, update the result with the final score and save again
+        // Update and save the final result
         result.setScoreAchieved(scoreAchieved);
         result.setTotalMarks(totalMarks);
+
         examResultRepository.save(result);
 
-        // Pass data to the result page
-        redirectAttributes.addFlashAttribute("score", scoreAchieved);
-        redirectAttributes.addFlashAttribute("total", totalMarks);
+        // Send score information to the result page
+        redirectAttributes.addFlashAttribute(
+                "score", scoreAchieved);
 
-        // Pass the result ID for the review button
-        redirectAttributes.addFlashAttribute("resultId", result.getId());
+        redirectAttributes.addFlashAttribute(
+                "total", totalMarks);
+
+        redirectAttributes.addFlashAttribute(
+                "resultId", result.getId());
 
         return "redirect:/student/result";
     }
 }
-
