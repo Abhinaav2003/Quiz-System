@@ -355,7 +355,7 @@
                     </label>
 
                     <p class="form-text">
-                        Select one of the four available avatars.
+                        Select one of the two available avatars.
                     </p>
 
                     <div class="avatar-options">
@@ -367,7 +367,7 @@
                                    required>
 
                             <img th:src="@{/images/avatars/avatar1.png}"
-                                 alt="Boy avatar 1">
+                                 alt="Boy avatar">
                         </label>
 
                         <label class="avatar-option">
@@ -376,25 +376,7 @@
                                    value="avatar2.png">
 
                             <img th:src="@{/images/avatars/avatar2.png}"
-                                 alt="Girl avatar 1">
-                        </label>
-
-                        <label class="avatar-option">
-                            <input type="radio"
-                                   name="avatar"
-                                   value="avatar3.png">
-
-                            <img th:src="@{/images/avatars/avatar3.png}"
-                                 alt="Boy avatar 2">
-                        </label>
-
-                        <label class="avatar-option">
-                            <input type="radio"
-                                   name="avatar"
-                                   value="avatar4.png">
-
-                            <img th:src="@{/images/avatars/avatar4.png}"
-                                 alt="Girl avatar 2">
+                                 alt="Girl avatar">
                         </label>
 
                     </div>
@@ -498,9 +480,7 @@
 
         var allowedAvatars = [
             'avatar1.png',
-            'avatar2.png',
-            'avatar3.png',
-            'avatar4.png'
+            'avatar2.png'
         ];
 
         avatarInputs.forEach(function (radio) {
