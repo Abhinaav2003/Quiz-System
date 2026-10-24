@@ -17,7 +17,7 @@
 
 ## Table of Contents
 
-- [Overview](#Live)
+- [Live Demo](#Live)
 - [Overview](#overview)
 - [Features](#features)
 - [Screenshots](#screenshots)
