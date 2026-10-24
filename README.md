@@ -1,9 +1,8 @@
 ﻿<h1 align="center">Online Exam System</h1>
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=java,spring,hibernate,postgres,maven,docker" alt="Tech stack icons" />
+  <img src="https://skillicons.dev/icons?i=java,spring,hibernate,postgres,maven" alt="Tech stack icons" />
 </p>
-
 
 <p align="center">
   A secure web-based examination platform built with Spring Boot, Spring Security, Thymeleaf, Bootstrap 5, and PostgreSQL.
@@ -13,11 +12,17 @@
   <b>Exam Management · Timed Online Tests · Automatic Evaluation · Result Tracking</b>
 </p>
 
+<p align="center">
+  <a href="https://quiz-system-hmxo.onrender.com/">
+    <img src="https://img.shields.io/badge/Live%20Demo-Online-brightgreen?style=for-the-badge" alt="Live Demo" />
+  </a>
+</p>
+
 ---
 
 ## Table of Contents
 
-- [Live Demo](#Live)
+- [Live Demo](#-live-demo)
 - [Overview](#overview)
 - [Features](#features)
 - [Screenshots](#screenshots)
@@ -30,6 +35,7 @@
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
+- [Authors](#authors)
 
 ---
 
@@ -52,7 +58,7 @@ The platform covers the full examination lifecycle: exam and question management
 ### Project Flow Diagram
 
 <p align="center">
-  <img src="./screenshots/Flow%20Diagram.png" alt="Front page" width="90%">
+  <img src="./screenshots/Flow%20Diagram.png" alt="Project flow diagram" width="90%">
 </p>
 
 ### Administrator
@@ -93,13 +99,13 @@ Screenshots are stored in the `screenshots/` directory.
 ### Create Account
 
 <p align="center">
-  <img src="./screenshots/Create%20Page.png" alt="Question management page" width="90%">
+  <img src="./screenshots/Create%20Page.png" alt="Create account page" width="90%">
 </p>
 
-### Login Account
+### Login
 
 <p align="center">
-  <img src="./screenshots/Login%20Page.png" alt="Student dashboard" width="90%">
+  <img src="./screenshots/Login%20Page.png" alt="Login page" width="90%">
 </p>
 
 ### Admin Dashboard
@@ -127,8 +133,9 @@ Screenshots are stored in the `screenshots/` directory.
 | UI Framework | Bootstrap 5 |
 | Charts | Chart.js (optional) |
 | ORM | Hibernate / Spring Data JPA |
-| Database | Neon Database |
+| Database | PostgreSQL (Neon in production, local PostgreSQL for development) |
 | Build Tool | Maven |
+| Hosting | Render |
 | Version Control | Git / GitHub |
 
 ---
@@ -153,7 +160,7 @@ online-exam-system/
 │   │       ├── templates/
 │   │       ├── static/
 │   │       │   ├── css/
-│   │       │   ├── js/
+│   │       │   └── js/
 │   │       └── application.properties
 │   └── test/
 ├── screenshots/
@@ -172,7 +179,7 @@ online-exam-system/
 | Requirement | Notes |
 |---|---|
 | JDK 17 or higher | Verify with `java -version` |
-| PostgreSQL 14 or higher | Local install or Docker; verify with `psql --version` |
+| PostgreSQL 14 or higher | Local install, Docker, or a hosted service such as Neon; verify with `psql --version` |
 | Maven | Optional; the included Maven Wrapper is recommended |
 | Git | Required to clone the repository |
 | IDE | VS Code, IntelliJ IDEA, or Eclipse |
@@ -188,6 +195,17 @@ cd online-exam-system-master-main
 
 > If `pom.xml` is located in a nested directory, change into that directory before running Maven commands.
 
+**2. Create the database**
+
+Create a PostgreSQL database (local, Docker, or hosted):
+
+```sql
+CREATE DATABASE examdb;
+```
+
+**3. Configure the application**
+
+Edit `src/main/resources/application.properties` (see [Configuration](#configuration)).
 
 **4. Build the application**
 
@@ -211,8 +229,16 @@ mvn clean package -DskipTests
 
 **5. Run the application**
 
+Windows (PowerShell):
+
 ```powershell
 .\mvnw.cmd spring-boot:run
+```
+
+macOS / Linux:
+
+```bash
+./mvnw spring-boot:run
 ```
 
 Alternatively, run `OnlineExamApplication.java` directly from your IDE.
@@ -227,17 +253,42 @@ Navigate to **http://localhost:8080**. The port may differ if `server.port` is c
 
 The application uses PostgreSQL for persistence. Tables are created and updated automatically by Hibernate on startup.
 
+For local development, set these in `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/examdb
+spring.datasource.username=YOUR_DB_USER
+spring.datasource.password=YOUR_DB_PASSWORD
+spring.jpa.hibernate.ddl-auto=update
+```
+
+For deployment (Render, Neon, etc.), use environment variables instead of committing credentials:
+
+```properties
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USER}
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+```
+
+| Variable | Description |
+|---|---|
+| `DB_URL` | JDBC connection URL, e.g. `jdbc:postgresql://HOST/DBNAME?sslmode=require` |
+| `DB_USER` | Database username |
+| `DB_PASSWORD` | Database password |
+
+> **Never commit real database credentials to GitHub.**
+
+---
 
 ## Default Administrator Account
 
 The application may create an administrator account on startup. Check `OnlineExamApplication.java` and the security configuration for the actual credentials.
 
-| Field | Example Value |
+| Field | Value |
 |---|---|
-| Username | `------` |
-| Password | `------` |
-
-These values are illustrative and have not been independently verified against the current source.
+| Username | Set in source code or environment variables |
+| Password | Set in source code or environment variables |
 
 > **Security notice:** Never deploy an application with default administrator credentials. Set a strong, unique password before any public or production deployment.
 
@@ -262,6 +313,7 @@ Remove-Item -Recurse -Force target -ErrorAction SilentlyContinue
 
 This removes generated build artifacts in `target/` and rebuilds the project. It does not touch the PostgreSQL database or uploaded profile pictures.
 
+---
 
 ## Roadmap
 
@@ -290,7 +342,7 @@ Contributions are welcome.
 
 ## License
 
-Add your license information here (for example, MIT) and include a corresponding `LICENSE` file in the repository.
+This project is licensed under the MIT License. Add a `LICENSE` file to the repository root with the MIT license text.
 
 ---
 
@@ -300,5 +352,3 @@ This project was designed and developed by:
 
 - **Abhinav Tiwari**
 - **Anshu Rajput**
-
----
