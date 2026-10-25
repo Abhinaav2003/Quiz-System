@@ -12,12 +12,6 @@
   <b>Exam Management · Timed Online Tests · Automatic Evaluation · Result Tracking</b>
 </p>
 
-<p align="center">
-  <a href="https://quiz-system-hmxo.onrender.com/">
-    <img src="https://img.shields.io/badge/Live%20Demo-Online-brightgreen?style=for-the-badge" alt="Live Demo" />
-  </a>
-</p>
-
 ---
 
 ## Table of Contents
