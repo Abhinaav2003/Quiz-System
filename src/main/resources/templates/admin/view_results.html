@@ -256,6 +256,9 @@
 
             <p class="sub">
                 View student scores, percentages, and quiz duration.
+                <span th:if="${exam.teacherName != null and !#strings.isEmpty(exam.teacherName)}">
+                    &middot; Teacher: <strong th:text="${exam.teacherName}">Teacher</strong>
+                </span>
             </p>
 
             <!-- Sorting toolbar -->

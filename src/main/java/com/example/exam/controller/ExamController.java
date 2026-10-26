@@ -213,6 +213,22 @@ public class ExamController {
         redirectAttributes.addFlashAttribute(
                 "resultId", result.getId());
 
+        // Details shown on the result page
+        String studentName =
+                (student.getFullName() != null
+                        && !student.getFullName().isBlank())
+                        ? student.getFullName()
+                        : student.getUsername();
+
+        redirectAttributes.addFlashAttribute(
+                "studentName", studentName);
+
+        redirectAttributes.addFlashAttribute(
+                "examTitle", exam.getTitle());
+
+        redirectAttributes.addFlashAttribute(
+                "teacherName", exam.getTeacherName());
+
         return "redirect:/student/result";
     }
 }

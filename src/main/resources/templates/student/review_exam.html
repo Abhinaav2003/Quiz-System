@@ -115,6 +115,8 @@
             <div>
                 <h1 th:text="${exam.title}">Exam title</h1>
                 <p class="sub">Reviewing your results</p>
+                <p class="sub" th:if="${exam.teacherName != null and !#strings.isEmpty(exam.teacherName)}"
+                   th:text="|Teacher: ${exam.teacherName}|">Teacher: Name</p>
             </div>
             <div>
                 <p class="score-label">Your score</p>

@@ -701,6 +701,11 @@
                 <span th:text="${exam.title}">Exam title</span>
             </span>
 
+            <span th:if="${exam.teacherName != null and !#strings.isEmpty(exam.teacherName)}">
+                <strong>Teacher:</strong>
+                <span th:text="${exam.teacherName}">Teacher name</span>
+            </span>
+
             <span>
                 <strong>Time:</strong>
                 <span th:text="${exam.durationInMinutes} + ' minutes'">

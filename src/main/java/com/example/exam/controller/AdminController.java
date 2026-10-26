@@ -284,6 +284,9 @@ public class AdminController {
         existingExam.setDurationInMinutes(
                 updatedExam.getDurationInMinutes());
 
+        existingExam.setTeacherName(
+                updatedExam.getTeacherName());
+
         examRepository.save(existingExam);
 
         return "redirect:/admin/manage-exams";

@@ -186,6 +186,9 @@
                             <div>
                                 <p class="exam-title" th:text="${exam.title}">Exam title</p>
                                 <span class="exam-meta" th:text="|${exam.durationInMinutes} minutes, ${#lists.size(exam.questions)} questions|">60 minutes, 10 questions</span>
+                                <span class="exam-meta d-block"
+                                      th:if="${exam.teacherName != null and !#strings.isEmpty(exam.teacherName)}"
+                                      th:text="|Teacher: ${exam.teacherName}|">Teacher: Name</span>
                             </div>
                             <a th:href="@{/exam/{id}(id=${exam.id})}" class="btn btn-brand">Start exam</a>
                         </li>
@@ -212,6 +215,9 @@
                     <div class="result-top">
                         <div>
                             <p class="result-title" th:text="${result.exam.title}">Java Basics</p>
+                            <p class="result-date"
+                               th:if="${result.exam.teacherName != null and !#strings.isEmpty(result.exam.teacherName)}"
+                               th:text="|Teacher: ${result.exam.teacherName}|">Teacher: Name</p>
                             <p class="result-date" th:text="${#temporals.format(result.submissionTime, 'MMM dd, yyyy')}"></p>
                         </div>
 

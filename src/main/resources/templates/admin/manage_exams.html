@@ -239,6 +239,11 @@
 
                     <div class="exam-meta">
 
+                        <span th:if="${exam.teacherName != null and !#strings.isEmpty(exam.teacherName)}">
+                            <i class="bi bi-person-badge"></i>
+                            <span th:text="${exam.teacherName}">Teacher</span>
+                        </span>
+
                         <span>
                             <i class="bi bi-stopwatch"></i>
                             <span th:text="${exam.durationInMinutes}">60</span>

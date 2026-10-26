@@ -100,6 +100,13 @@
                     <p th:if="${#fields.hasErrors('title')}" class="field-error" th:errors="*{title}"></p>
                 </div>
 
+                <div class="mb-3">
+                    <label for="teacherName" class="form-label">Teacher name</label>
+                    <input type="text" class="form-control" id="teacherName" th:field="*{teacherName}"
+                           th:errorclass="is-invalid" maxlength="100" required>
+                    <p th:if="${#fields.hasErrors('teacherName')}" class="field-error" th:errors="*{teacherName}"></p>
+                </div>
+
                 <div class="mb-4">
                     <label for="duration" class="form-label">Duration (minutes)</label>
                     <input type="number" class="form-control" id="duration" th:field="*{durationInMinutes}"

@@ -17,6 +17,10 @@ public class Exam {
     @Column(nullable = false)
     private int durationInMinutes;
 
+    // Name of the teacher who created/conducts this exam (nullable for older exams)
+    @Column(name = "teacher_name", nullable = true)
+    private String teacherName;
+
 
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Question> questions;
