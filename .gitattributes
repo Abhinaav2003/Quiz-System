@@ -1,3 +1,8 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
 /target
+
+
+*.html linguist-detectable=false
+*.css linguist-detectable=false
+*.js linguist-detectable=false
